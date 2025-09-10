@@ -1,39 +1,30 @@
-version: "3.9"
-
 services:
   db:
     image: postgres:15
-    container_name: blogs_db
-    restart: always
+    container_name: app_db
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: app_db
     ports:
-      - "5434:5432"   # 👈 host pe 5434, container ke andar 5432
-    volumes:
-      - blogsapi_pgdata:/var/lib/postgresql/data
+      - "5434:5432"
     networks:
-      - blogsapi_net
+      - app_net
 
   localstack:
     image: localstack/localstack
-    container_name: localstack_blogs
+    container_name: localstack
     ports:
-      - "4567:4566"   # 👈 host pe 4567, andar 4566 (career localstack se clash avoid karne ke liye)
-      - "4572:4571"
+      - "4567:4566"
     environment:
       - SERVICES=s3
       - DEBUG=1
-      - DATA_DIR=/tmp/localstack/data
-    volumes:
-      - ./localstack:/tmp/localstack
     networks:
-      - blogsapi_net
+      - app_net
 
   api:
     build: .
-    container_name: blogs_api
+    container_name: fastapi_app
     restart: always
     env_file:
       - .env
@@ -41,13 +32,15 @@ services:
       - db
       - localstack
     ports:
-      - "8001:8000"   # 👈 host pe 8001, andar FastAPI 8000 pe hi chalegi
+      - "8000:8000"
     networks:
-      - blogsapi_net
+      - app_net
 
+# Define volumes if needed
 volumes:
-  blogsapi_pgdata:
+  pgdata:
 
+# Define networks
 networks:
-  blogsapi_net:
+  app_net:
     driver: bridge
