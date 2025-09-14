@@ -13,7 +13,11 @@ async def create_blog(db: AsyncSession, blog: schemas.BlogCreate):
     db.add(new_blog)
     await db.commit()
     await db.refresh(new_blog)
-    return new_blog
+    return {
+        "success": True,
+        "message": "Blog created successfully",
+        "blog_id": new_blog.id
+    }
 
 # Read all
 async def get_blogs(db: AsyncSession):
