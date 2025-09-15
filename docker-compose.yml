@@ -1,3 +1,5 @@
+version: "3.9"  # optional, for clarity
+
 services:
   db:
     image: postgres:15
@@ -5,13 +7,11 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-<<<<<<< HEAD
-      POSTGRES_DB: blog_db    # <-- changed from app_db to blog_db
-=======
-      POSTGRES_DB: blog_db
->>>>>>> 6c2e87f4351edda155a678643ed75a5b9f58626d
+      POSTGRES_DB: blog_db   # <-- changed from app_db to blog_db
     ports:
       - "5434:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
     networks:
       - app_net
 
