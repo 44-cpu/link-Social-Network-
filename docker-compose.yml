@@ -5,7 +5,11 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+<<<<<<< HEAD
       POSTGRES_DB: blog_db    # <-- changed from app_db to blog_db
+=======
+      POSTGRES_DB: blog_db
+>>>>>>> 6c2e87f4351edda155a678643ed75a5b9f58626d
     ports:
       - "5434:5432"
     networks:
