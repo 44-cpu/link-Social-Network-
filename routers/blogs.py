@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 import schemas, crud
 from database import get_db
@@ -6,36 +6,51 @@ from s3_utils import s3_client, BUCKET_NAME
 
 router = APIRouter(tags=["Blogs"], prefix="/blogs")
 
-@router.post("/", response_model=schemas.Blog)
+# ✅ Create Blog
+@router.post("/", response_model=schemas.Blog, status_code=status.HTTP_201_CREATED)
 async def create_blog(blog: schemas.BlogCreate, db: AsyncSession = Depends(get_db)):
-    return await crud.create_blog(db, blog)
+    new_blog = await crud.create_blog(db, blog)
+    if not new_blog:
+        raise HTTPException(status_code=400, detail="Blog could not be created")
+    return new_blog
 
-@router.get("/", response_model=list[schemas.Blog])
+
+# ✅ Get All Blogs
+@router.get("/", response_model=list[schemas.Blog], status_code=status.HTTP_200_OK)
 async def get_blogs(db: AsyncSession = Depends(get_db)):
-    return await crud.get_blogs(db)
+    blogs = await crud.get_blogs(db)
+    return blogs
 
-@router.get("/{blog_id}", response_model=schemas.Blog)
+
+# ✅ Get Single Blog
+@router.get("/{blog_id}", response_model=schemas.Blog, status_code=status.HTTP_200_OK)
 async def get_blog(blog_id: int, db: AsyncSession = Depends(get_db)):
     blog = await crud.get_blog(db, blog_id)
     if not blog:
         raise HTTPException(status_code=404, detail="Blog not found")
     return blog
 
-@router.put("/{blog_id}", response_model=schemas.Blog)
+
+# ✅ Update Blog
+@router.put("/{blog_id}", response_model=schemas.Blog, status_code=status.HTTP_200_OK)
 async def update_blog(blog_id: int, updated_blog: schemas.BlogCreate, db: AsyncSession = Depends(get_db)):
     blog = await crud.update_blog(db, blog_id, updated_blog)
     if not blog:
         raise HTTPException(status_code=404, detail="Blog not found")
     return blog
 
-@router.delete("/{blog_id}")
+
+# ✅ Delete Blog
+@router.delete("/{blog_id}", status_code=status.HTTP_200_OK)
 async def delete_blog(blog_id: int, db: AsyncSession = Depends(get_db)):
-    blog = await crud.delete_blog(db, blog_id)
-    if not blog:
+    deleted_blog = await crud.delete_blog(db, blog_id)
+    if not deleted_blog:
         raise HTTPException(status_code=404, detail="Blog not found")
     return {"detail": "Blog deleted successfully"}
 
-@router.get("/{blog_id}/image")
+
+# ✅ Get Blog Image
+@router.get("/{blog_id}/image", status_code=status.HTTP_200_OK)
 async def get_blog_image(blog_id: int, db: AsyncSession = Depends(get_db)):
     blog = await crud.get_blog(db, blog_id)
     if not blog or not blog.image_url:

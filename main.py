@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from database import engine, Base
 from routers import blogs, careers
 from aws_utils import init_s3 as init_career_s3
-from s3_utils import init_blogs_s3  # Blogs S3 initialization
+from s3_utils import init_blogs_s3  # Blogs S3 initialization 
 
 app = FastAPI()
 

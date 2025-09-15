@@ -5,7 +5,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: app_db
+      POSTGRES_DB: blog_db    # <-- changed from app_db to blog_db
     ports:
       - "5434:5432"
     networks:
@@ -36,11 +36,9 @@ services:
     networks:
       - app_net
 
-# Define volumes if needed
 volumes:
   pgdata:
 
-# Define networks
 networks:
   app_net:
     driver: bridge
