@@ -1,4 +1,4 @@
-version: "3.9"  # optional, for clarity
+version: "3.9"
 
 services:
   db:
@@ -7,13 +7,19 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: blog_db   # <-- changed from app_db to blog_db
+      POSTGRES_DB: blog_db
     ports:
       - "5434:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks:
       - app_net
+    # 👇 healthcheck so API waits until DB is ready
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d blog_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   localstack:
     image: localstack/localstack
@@ -33,8 +39,10 @@ services:
     env_file:
       - .env
     depends_on:
-      - db
-      - localstack
+      db:
+        condition: service_healthy   # 👈 wait until DB healthcheck passes
+      localstack:
+        condition: service_started
     ports:
       - "8000:8000"
     networks:
