@@ -14,7 +14,7 @@ services:
       - pgdata:/var/lib/postgresql/data
     networks:
       - app_net
-    # 👇 healthcheck so API waits until DB is ready
+    #  healthcheck so API waits until DB is ready
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d blog_db"]
       interval: 5s
@@ -40,7 +40,7 @@ services:
       - .env
     depends_on:
       db:
-        condition: service_healthy   # 👈 wait until DB healthcheck passes
+        condition: service_healthy   #  wait until DB healthcheck passes
       localstack:
         condition: service_started
     ports:

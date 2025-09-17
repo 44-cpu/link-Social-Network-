@@ -21,9 +21,9 @@ def init_s3():
     existing_buckets = [b["Name"] for b in s3.list_buckets().get("Buckets", [])]
     if CAREER_BUCKET not in existing_buckets:
         s3.create_bucket(Bucket=CAREER_BUCKET)
-        print(f"✅ Career S3 bucket '{CAREER_BUCKET}' created.")
+        print(f" Career S3 bucket '{CAREER_BUCKET}' created.")
     else:
-        print(f"✅ Career S3 bucket '{CAREER_BUCKET}' already exists.")
+        print(f" Career S3 bucket '{CAREER_BUCKET}' already exists.")
 
 def upload_file(file_obj, filename, bucket_name: str = CAREER_BUCKET) -> str:
     """Upload file to Career S3 bucket and return URL"""

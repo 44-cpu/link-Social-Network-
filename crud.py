@@ -3,9 +3,7 @@ from sqlalchemy.future import select
 import models, schemas
 
 # -------------------- BLOG CRUD --------------------
-
 async def create_blog(db: AsyncSession, blog: schemas.BlogCreate):
-    """Create a new blog"""
     new_blog = models.Blog(
         title=blog.title,
         content=blog.content,
@@ -14,20 +12,17 @@ async def create_blog(db: AsyncSession, blog: schemas.BlogCreate):
     db.add(new_blog)
     await db.commit()
     await db.refresh(new_blog)
-    return new_blog  # ✅ Return model instance for FastAPI response
+    return new_blog
 
 async def get_blogs(db: AsyncSession):
-    """Get all blogs"""
     result = await db.execute(select(models.Blog))
     return result.scalars().all()
 
 async def get_blog(db: AsyncSession, blog_id: int):
-    """Get single blog"""
     result = await db.execute(select(models.Blog).where(models.Blog.id == blog_id))
     return result.scalar_one_or_none()
 
 async def update_blog(db: AsyncSession, blog_id: int, updated_blog: schemas.BlogCreate):
-    """Update blog"""
     result = await db.execute(select(models.Blog).where(models.Blog.id == blog_id))
     blog = result.scalar_one_or_none()
     if blog:
@@ -39,7 +34,6 @@ async def update_blog(db: AsyncSession, blog_id: int, updated_blog: schemas.Blog
     return blog
 
 async def delete_blog(db: AsyncSession, blog_id: int):
-    """Delete blog"""
     result = await db.execute(select(models.Blog).where(models.Blog.id == blog_id))
     blog = result.scalar_one_or_none()
     if blog:
@@ -48,13 +42,12 @@ async def delete_blog(db: AsyncSession, blog_id: int):
     return blog
 
 # -------------------- CAREER CRUD --------------------
-
 async def create_career(db: AsyncSession, career: schemas.CareerCreate, resume_url: str | None = None):
-    """Create career application"""
     new_career = models.Career(
         name=career.name,
         email=career.email,
         position=career.position,
+        type=career.type,         #  NEW
         resume_url=resume_url
     )
     db.add(new_career)
@@ -62,18 +55,18 @@ async def create_career(db: AsyncSession, career: schemas.CareerCreate, resume_u
     await db.refresh(new_career)
     return new_career
 
-async def get_careers(db: AsyncSession):
-    """Get all career applications"""
-    result = await db.execute(select(models.Career))
+async def get_careers(db: AsyncSession, type: str | None = None):
+    query = select(models.Career)
+    if type:  #  filter by internal/external
+        query = query.where(models.Career.type == type)
+    result = await db.execute(query)
     return result.scalars().all()
 
 async def get_career(db: AsyncSession, career_id: int):
-    """Get single career application"""
     result = await db.execute(select(models.Career).where(models.Career.id == career_id))
     return result.scalar_one_or_none()
 
 async def delete_career(db: AsyncSession, career_id: int):
-    """Delete career application"""
     result = await db.execute(select(models.Career).where(models.Career.id == career_id))
     career = result.scalar_one_or_none()
     if career:

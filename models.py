@@ -1,11 +1,9 @@
 from sqlalchemy import Column, Integer, String, Text
-from sqlalchemy.future import select
-import models, schemas
 from database import Base
 
 # ----------------- Blog Model -----------------
 class Blog(Base):
-    __tablename__ = "blogs" 
+    __tablename__ = "blogs"
 
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(255), nullable=False)
@@ -21,3 +19,12 @@ class Career(Base):
     email = Column(String(255), nullable=False)
     position = Column(String(255), nullable=False)
     resume_url = Column(String(500), nullable=True)  # S3 resume link
+    type = Column(String(50), nullable=False, default="external")  # internal/external flag
+
+# ----------------- Settings Model -----------------
+class Setting(Base):
+    __tablename__ = "settings"
+
+    id = Column(Integer, primary_key=True, index=True)
+    key = Column(String(255), unique=True, index=True, nullable=False)
+    value = Column(String(255), nullable=False)

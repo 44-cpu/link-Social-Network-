@@ -31,6 +31,6 @@ def init_blogs_s3():
     existing_buckets = [b["Name"] for b in s3_client.list_buckets().get("Buckets", [])]
     if BUCKET_NAME not in existing_buckets:
         s3_client.create_bucket(Bucket=BUCKET_NAME)
-        print(f"✅ Blogs S3 bucket '{BUCKET_NAME}' created.")
+        print(f"Blogs S3 bucket '{BUCKET_NAME}' created.")
     else:
-        print(f"✅ Blogs S3 bucket '{BUCKET_NAME}' already exists.")
+        print(f"Blogs S3 bucket '{BUCKET_NAME}' already exists.")
