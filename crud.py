@@ -1,5 +1,7 @@
+# crud.py
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy import or_, and_
 import models, schemas
 
 # -------------------- BLOG CRUD --------------------
@@ -47,18 +49,27 @@ async def create_career(db: AsyncSession, career: schemas.CareerCreate, resume_u
         name=career.name,
         email=career.email,
         position=career.position,
-        type=career.type,         #  NEW
-        resume_url=resume_url
+        type=career.type,
+        resume_url=resume_url or career.resume_url,
+        skills=career.skills
     )
     db.add(new_career)
     await db.commit()
     await db.refresh(new_career)
     return new_career
 
-async def get_careers(db: AsyncSession, type: str | None = None):
+async def get_careers(db: AsyncSession, type: str | None = None, skill: str | None = None, position: str | None = None):
     query = select(models.Career)
-    if type:  #  filter by internal/external
-        query = query.where(models.Career.type == type)
+    filters = []
+    if type:
+        filters.append(models.Career.type == type)
+    if skill:
+        # case-insensitive match within skills string
+        filters.append(models.Career.skills.ilike(f"%{skill}%"))
+    if position:
+        filters.append(models.Career.position.ilike(f"%{position}%"))
+    if filters:
+        query = query.where(and_(*filters))
     result = await db.execute(query)
     return result.scalars().all()
 
