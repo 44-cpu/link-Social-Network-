@@ -1,29 +1,56 @@
-from fastapi import FastAPI
+# main.py
+from fastapi import FastAPI, Depends
 from database import engine, Base
-from routers import blogs, careers
+from routers import blogs, careers, auth, users
 from aws_utils import init_s3 as init_career_s3
-from s3_utils import init_blogs_s3  # Blogs S3 initialization 
+from s3_utils import init_blogs_s3
+from auth_utils import get_current_user  # ✅ import your dependency
 
-app = FastAPI()
+# ✅ Define OpenAPI security scheme (for Swagger lock icons)
+openapi_security = {
+    "components": {
+        "securitySchemes": {
+            "OAuth2PasswordBearer": {
+                "type": "oauth2",
+                "flows": {
+                    "password": {
+                        "tokenUrl": "/auth/login",
+                        "scopes": {}
+                    }
+                },
+            }
+        }
+    },
+    "security": [{"OAuth2PasswordBearer": []}],
+}
 
+# ✅ Create FastAPI app WITHOUT global dependency
+app = FastAPI(
+    title="Blogs & Careers API",
+    version="1.0",
+    openapi_extra=openapi_security
+)
+
+# ==========================================================
+# ⬇️ PUBLIC ROUTERS (no auth required)
+# ==========================================================
+app.include_router(auth.router)  # login/register are public
+app.add_api_route("/", lambda: {"status": "App running successfully 🚀"}, tags=["Health Check"])
+
+# ==========================================================
+# ⬇️ PROTECTED ROUTERS (require valid token)
+# ==========================================================
+# Apply get_current_user dependency to all routes in these routers
+app.include_router(users.router, dependencies=[Depends(get_current_user)])
+app.include_router(blogs.router, dependencies=[Depends(get_current_user)])
+app.include_router(careers.router, dependencies=[Depends(get_current_user)])
+
+# ==========================================================
+# Startup events
+# ==========================================================
 @app.on_event("startup")
 async def startup():
-    #  Create DB tables if not exist
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-
-    # Initialize Career Page S3 bucket
     init_career_s3()
-    print(" Career Page S3 initialized successfully!")
-
-    # Initialize Blogs S3 bucket
     init_blogs_s3()
-    print(" Blogs S3 initialized successfully!")
-
-# ---------------- Routers ----------------
-app.include_router(blogs.router)
-app.include_router(careers.router)
-
-@app.get("/")
-async def root():
-    return {"status": "app running "}

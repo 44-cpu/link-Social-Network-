@@ -1,17 +1,22 @@
 # models.py
-from sqlalchemy import Column, Integer, String, Text
+from sqlalchemy import Column, Integer, String, Text, Boolean, DateTime, ForeignKey, func
+from sqlalchemy.orm import relationship
 from database import Base
 
-# ----------------- Blog Model -----------------
+# -------------------- BLOG MODEL --------------------
 class Blog(Base):
     __tablename__ = "blogs"
 
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(255), nullable=False)
     content = Column(Text, nullable=False)
-    image_url = Column(String(500), nullable=True)  # stores S3 key (not the full url)
+    image_url = Column(String(255), nullable=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)  # Link to user
 
-# ----------------- Career Model -----------------
+    user = relationship("User", backref="blogs")  # Optional back-reference to user
+
+
+# -------------------- CAREER MODEL --------------------
 class Career(Base):
     __tablename__ = "careers"
 
@@ -19,14 +24,21 @@ class Career(Base):
     name = Column(String(255), nullable=False)
     email = Column(String(255), nullable=False)
     position = Column(String(255), nullable=False)
-    resume_url = Column(String(500), nullable=True)  # stores S3 key
-    type = Column(String(50), nullable=False, default="external")  # internal/external/cv_bank
-    skills = Column(String(500), nullable=True)  # comma separated skills/tags
+    type = Column(String(50), nullable=False)  # "internal" or "cv_bank"
+    skills = Column(Text, nullable=True)
+    resume_url = Column(String(255), nullable=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)  # optional link to user
 
-# ----------------- Settings Model -----------------
-class Setting(Base):
-    __tablename__ = "settings"
+    user = relationship("User", backref="careers")  # Optional back-reference to user
+
+
+# -------------------- USER MODEL --------------------
+class User(Base):
+    __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
-    key = Column(String(255), unique=True, index=True, nullable=False)
-    value = Column(String(255), nullable=False)
+    username = Column(String(100), unique=True, index=True, nullable=False)
+    email = Column(String(255), unique=True, index=True, nullable=False)
+    hashed_password = Column(String(255), nullable=False)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())

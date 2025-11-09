@@ -1,46 +1,97 @@
-# schemas.py
-from pydantic import BaseModel, ConfigDict, EmailStr
+from pydantic import BaseModel, EmailStr
 from typing import Optional
 
-# ----------------- Blog Schemas -----------------
+# ===============================
+# 🔹 USER SCHEMAS
+# ===============================
+
+class UserBase(BaseModel):
+    username: str
+    email: EmailStr
+
+class UserCreate(UserBase):
+    password: str
+
+class UserUpdate(BaseModel):
+    username: Optional[str] = None
+    email: Optional[EmailStr] = None
+    password: Optional[str] = None
+
+class UserLogin(BaseModel):
+    username: str
+    password: str
+
+class UserOut(UserBase):
+    id: int
+    is_active: bool
+
+    class Config:
+        from_attributes = True
+
+# ===============================
+# 🔹 TOKEN SCHEMAS
+# ===============================
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+
+class TokenData(BaseModel):
+    username: Optional[str] = None
+
+# ===============================
+# 🔹 BLOG SCHEMAS
+# ===============================
+
 class BlogBase(BaseModel):
     title: str
     content: str
-    image_url: Optional[str] = None  # will contain presigned url in responses
+    image_url: Optional[str] = None  # ✅ Added for image support
 
 class BlogCreate(BlogBase):
     pass
 
-class Blog(BlogBase):
+class BlogOut(BlogBase):
     id: int
-    model_config = ConfigDict(from_attributes=True)
 
-# ----------------- Career Schemas -----------------
+    class Config:
+        from_attributes = True
+
+# ===============================
+# 🔹 CAREER SCHEMAS
+# ===============================
+
 class CareerBase(BaseModel):
     name: str
     email: EmailStr
     position: str
-    type: str = "external"  # default; actual default DB se uthega
-    skills: Optional[str] = None  # comma separated
+    skills: Optional[str] = None
+    type: str
+    resume_url: Optional[str] = None
 
 class CareerCreate(CareerBase):
-    """Used when creating a career application."""
-    resume_url: Optional[str] = None  # will store S3 key
+    pass
 
-class Career(CareerBase):
+class CareerOut(CareerBase):
     id: int
-    resume_url: Optional[str] = None  # will be presigned url in responses
-    model_config = ConfigDict(from_attributes=True)
 
-# ----------------- Settings Schemas -----------------
+    class Config:
+        from_attributes = True
+
+# ===============================
+# 🔹 SETTINGS SCHEMAS
+# ===============================
+
 class SettingBase(BaseModel):
-    key: str
-    value: str
+    site_name: str
+    site_description: Optional[str] = None
+    contact_email: Optional[str] = None
 
 class SettingCreate(SettingBase):
-    """Used to create/update a setting.""" 
     pass
 
 class Setting(SettingBase):
     id: int
-    model_config = ConfigDict(from_attributes=True)
+
+    class Config:
+        from_attributes = True

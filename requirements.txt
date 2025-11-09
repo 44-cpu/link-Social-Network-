@@ -7,3 +7,5 @@ email-validator   # for EmailStr validation
 python-multipart  # if you’re uploading files
 pydantic          # make sure pydantic v2 is installed
 python-dotenv     # <— add this
+python-jose[cryptography]
+passlib[bcrypt]
